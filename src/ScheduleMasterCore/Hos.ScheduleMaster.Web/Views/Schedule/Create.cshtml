@@ -94,8 +94,15 @@
                                 <div class="form-group  @(Model == null || !Model.RunLoop ? "hide" : "")" id="ctn_CronExpression">
                                     <label for="" class="col-sm-2 control-label no-padding-right">Cron表达式</label>
                                     <div class="col-sm-6">
-                                        @Html.TextBoxFor(x => x.CronExpression, new { @class = "form-control", placeholder = "" })
-                                        <p class="help-block"><a target="_blank" href="http://cron.qqe2.com/">生成工具</a></p>
+                                        <div class="input-group">
+                                            @Html.TextBoxFor(x => x.CronExpression, new { @class = "form-control", placeholder = "", style="min-width:460px;" })
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-primary" onclick="showCronModal()">
+                                                    <i class="fa fa-clock-o"></i> 生成表达式
+                                                </button>
+                                            </span>
+                                        </div>
+                                        <p class="help-block">点击"生成表达式"按钮，使用表达式生成器</p>
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -443,6 +450,922 @@
         </div>
     </div>
 </div>
+
+<!-- Cron表达式生成器模态框 -->
+<div class="modal fade" id="cronModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">Cron表达式生成器</h4>
+            </div>
+            <div class="modal-body">
+                <!-- 选项卡导航 -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#secondTab" role="tab" data-toggle="tab">秒</a></li>
+                    <li role="presentation"><a href="#minuteTab" role="tab" data-toggle="tab">分钟</a></li>
+                    <li role="presentation"><a href="#hourTab" role="tab" data-toggle="tab">小时</a></li>
+                    <li role="presentation"><a href="#dayTab" role="tab" data-toggle="tab">日</a></li>
+                    <li role="presentation"><a href="#monthTab" role="tab" data-toggle="tab">月份</a></li>
+                    <li role="presentation"><a href="#weekTab" role="tab" data-toggle="tab">周（星期）</a></li>
+                    <li role="presentation"><a href="#yearTab" role="tab" data-toggle="tab">年份</a></li>
+                    <li role="presentation"><a href="#commonTab" role="tab" data-toggle="tab">常用表达式</a></li>
+                    <li role="presentation"><a href="#helpTab" role="tab" data-toggle="tab">帮助说明</a></li>
+                </ul>
+
+                <!-- 选项卡内容 -->
+                <div class="tab-content" style="padding: 15px;">
+                    <!-- 秒 -->
+                    <div role="tabpanel" class="tab-pane active" id="secondTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="secondType" value="*" checked onclick="updateField('second')"> 每秒 允许的通配符[, - * /]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="secondType" value="period" onclick="updateField('second')"> 周期 从
+                                <input type="number" id="secondStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('second')"> -
+                                <input type="number" id="secondEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('second')"> 秒
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="secondType" value="loop" onclick="updateField('second')"> 从
+                                <input type="number" id="secondBegin" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('second')"> 秒开始每
+                                <input type="number" id="secondInterval" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('second')"> 秒执行一次
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="secondType" value="specific" onclick="updateField('second')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                @for (int i = 0; i < 60; i++)
+                                {
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" class="second-checkbox" value="@(i.ToString("00"))" onclick="updateField('second')"> @(i.ToString("00"))
+                                    </label>
+                                    if ((i + 1) % 10 == 0)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分钟 -->
+                    <div role="tabpanel" class="tab-pane" id="minuteTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="minuteType" value="*" checked onclick="updateField('minute')"> 每分钟 允许的通配符[, - * /]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="minuteType" value="period" onclick="updateField('minute')"> 周期 从
+                                <input type="number" id="minuteStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('minute')"> -
+                                <input type="number" id="minuteEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('minute')"> 分钟
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="minuteType" value="loop" onclick="updateField('minute')"> 从
+                                <input type="number" id="minuteBegin" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('minute')"> 分钟开始每
+                                <input type="number" id="minuteInterval" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('minute')"> 分钟执行一次
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="minuteType" value="specific" onclick="updateField('minute')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                @for (int i = 0; i < 60; i++)
+                                {
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" class="minute-checkbox" value="@(i.ToString("00"))" onclick="updateField('minute')"> @(i.ToString("00"))
+                                    </label>
+                                    if ((i + 1) % 10 == 0)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 小时 -->
+                    <div role="tabpanel" class="tab-pane" id="hourTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="hourType" value="*" checked onclick="updateField('hour')"> 每小时 允许的通配符[, - * /]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="hourType" value="period" onclick="updateField('hour')"> 周期 从
+                                <input type="number" id="hourStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('hour')"> -
+                                <input type="number" id="hourEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('hour')"> 小时
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="hourType" value="loop" onclick="updateField('hour')"> 从
+                                <input type="number" id="hourBegin" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('hour')"> 小时开始每
+                                <input type="number" id="hourInterval" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('hour')"> 小时执行一次
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="hourType" value="specific" onclick="updateField('hour')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                @for (int i = 0; i < 24; i++)
+                                {
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" class="hour-checkbox" value="@(i.ToString("00"))" onclick="updateField('hour')"> @(i.ToString("00"))
+                                    </label>
+                                    if ((i + 1) % 6 == 0)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 日 -->
+                    <div role="tabpanel" class="tab-pane" id="dayTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="*" checked onclick="updateField('day')"> 每日 允许的通配符[, - * / L W]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="?" onclick="updateField('day')"> 不指定
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="period" onclick="updateField('day')"> 周期 从
+                                <input type="number" id="dayStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('day')"> -
+                                <input type="number" id="dayEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('day')"> 日
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="loop" onclick="updateField('day')"> 从
+                                <input type="number" id="dayBegin" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('day')"> 日开始每
+                                <input type="number" id="dayInterval" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('day')"> 天执行一次
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="work" onclick="updateField('day')"> 每月
+                                <input type="number" id="dayWork" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('day')"> 号最近的工作日
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="last" onclick="updateField('day')"> 本月最后一天
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="dayType" value="specific" onclick="updateField('day')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                @for (int i = 1; i <= 31; i++)
+                                {
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" class="day-checkbox" value="@(i.ToString())" onclick="updateField('day')"> @(i.ToString())
+                                    </label>
+                                    if (i % 11 == 0)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 月份 -->
+                    <div role="tabpanel" class="tab-pane" id="monthTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="monthType" value="*" checked onclick="updateField('month')"> 每月 允许的通配符[, - * /]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="monthType" value="period" onclick="updateField('month')"> 周期 从
+                                <input type="number" id="monthStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('month')"> -
+                                <input type="number" id="monthEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('month')"> 月
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="monthType" value="loop" onclick="updateField('month')"> 从
+                                <input type="number" id="monthBegin" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('month')"> 月开始每
+                                <input type="number" id="monthInterval" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('month')"> 月执行一次
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="monthType" value="specific" onclick="updateField('month')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" class="month-checkbox" value="@(i.ToString())" onclick="updateField('month')"> @(i.ToString())月
+                                    </label>
+                                    if (i % 6 == 0)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 周（星期） -->
+                    <div role="tabpanel" class="tab-pane" id="weekTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="weekType" value="*" checked onclick="updateField('week')"> 每周 允许的通配符[, - * / L #]
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="weekType" value="?" onclick="updateField('week')"> 不指定
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="weekType" value="period" onclick="updateField('week')"> 周期 从星期
+                                <input type="number" id="weekStart" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('week')"> -
+                                <input type="number" id="weekEnd" class="form-control input-sm" style="display: inline-block; width: 80px;" onchange="updateField('week')">
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="weekType" value="last" onclick="updateField('week')"> 本月最后一个星期
+                                <select class="form-control input-sm" style="display: inline-block; width: 80px;" id="weekLast" onchange="updateField('week')">
+                                    <option value="1">一</option>
+                                    <option value="2">二</option>
+                                    <option value="3">三</option>
+                                    <option value="4">四</option>
+                                    <option value="5">五</option>
+                                    <option value="6">六</option>
+                                    <option value="7">日</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="weekType" value="specific" onclick="updateField('week')"> 指定
+                            </label>
+                            <div class="checkbox-list" style="margin-top: 10px;">
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="1" onclick="updateField('week')"> 周一
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="2" onclick="updateField('week')"> 周二
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="3" onclick="updateField('week')"> 周三
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="4" onclick="updateField('week')"> 周四
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="5" onclick="updateField('week')"> 周五
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="6" onclick="updateField('week')"> 周六
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="7" onclick="updateField('week')"> 周日
+                                </label>
+                                <br/>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="1-5" onclick="updateField('week')"> 工作日
+                                </label>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="week-checkbox" value="6,7" onclick="updateField('week')"> 周末
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 年份 -->
+                    <div role="tabpanel" class="tab-pane" id="yearTab">
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="yearType" value="?" checked onclick="updateField('year')"> 不指定 允许的通配符[, - * /]非必填
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="yearType" value="*" onclick="updateField('year')"> 每年
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="yearType" value="period" onclick="updateField('year')"> 周期 从
+                                <input type="number" id="yearStart" class="form-control input-sm" style="display: inline-block; width: 100px;" onchange="updateField('year')" placeholder="2024"> -
+                                <input type="number" id="yearEnd" class="form-control input-sm" style="display: inline-block; width: 100px;" onchange="updateField('year')" placeholder="2025">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 常用表达式 -->
+                    <div role="tabpanel" class="tab-pane" id="commonTab">
+                        <div class="common-expressions">
+                            <h4>常用表达式</h4>
+                            <div class="list-group">
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 0 12 * * ?', '每天中午12点执行')">
+                                    <h5 class="list-group-item-heading">0 0 12 * * ?</h5>
+                                    <p class="list-group-item-text">每天中午12点执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 ? * *', '每天上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 ? * *</h5>
+                                    <p class="list-group-item-text">每天上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 * * ?', '每天上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 * * ?</h5>
+                                    <p class="list-group-item-text">每天上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 * * ? *', '每天上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 * * ? *</h5>
+                                    <p class="list-group-item-text">每天上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 * * ? 2005', '2005年的每天上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 * * ? 2005</h5>
+                                    <p class="list-group-item-text">2005年的每天上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 * 14 * * ?', '每天下午2点到下午2:59期间的每1分钟执行')">
+                                    <h5 class="list-group-item-heading">0 * 14 * * ?</h5>
+                                    <p class="list-group-item-text">每天下午2点到下午2:59期间的每1分钟执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 0/5 14 * * ?', '每天下午2点到下午2:55期间的每5分钟执行')">
+                                    <h5 class="list-group-item-heading">0 0/5 14 * * ?</h5>
+                                    <p class="list-group-item-text">每天下午2点到下午2:55期间的每5分钟执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 0/5 14,18 * * ?', '每天下午2点到2:55期间和下午6点到6:55期间的每5分钟执行')">
+                                    <h5 class="list-group-item-heading">0 0/5 14,18 * * ?</h5>
+                                    <p class="list-group-item-text">每天下午2点到2:55期间和下午6点到6:55期间的每5分钟执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 0-5 14 * * ?', '每天下午2点到下午2:05期间的每1分钟执行')">
+                                    <h5 class="list-group-item-heading">0 0-5 14 * * ?</h5>
+                                    <p class="list-group-item-text">每天下午2点到下午2:05期间的每1分钟执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 10,44 14 ? 3 WED', '每年三月的星期三的下午2:10和2:44执行')">
+                                    <h5 class="list-group-item-heading">0 10,44 14 ? 3 WED</h5>
+                                    <p class="list-group-item-text">每年三月的星期三的下午2:10和2:44执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 ? * MON-FRI', '周一至周五的上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 ? * MON-FRI</h5>
+                                    <p class="list-group-item-text">周一至周五的上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 15 * ?', '每月15日上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 15 * ?</h5>
+                                    <p class="list-group-item-text">每月15日上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 L * ?', '每月最后一日的上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 L * ?</h5>
+                                    <p class="list-group-item-text">每月最后一日的上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 ? * 6L', '每月的最后一个星期五上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 ? * 6L</h5>
+                                    <p class="list-group-item-text">每月的最后一个星期五上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 ? * 6L 2002-2005', '2002年至2005年的每月的最后一个星期五上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 ? * 6L 2002-2005</h5>
+                                    <p class="list-group-item-text">2002年至2005年的每月的最后一个星期五上午10:15执行</p>
+                                </a>
+                                <a href="javascript:void(0)" class="list-group-item" onclick="applyCommonExpression('0 15 10 ? * 6#3', '每月的第三个星期五上午10:15执行')">
+                                    <h5 class="list-group-item-heading">0 15 10 ? * 6#3</h5>
+                                    <p class="list-group-item-text">每月的第三个星期五上午10:15执行</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 帮助说明 -->
+                    <div role="tabpanel" class="tab-pane" id="helpTab">
+                        <div class="help-content">
+                            <h4>Cron表达式说明</h4>
+                            <div class="panel panel-default">
+                                <div class="panel-heading">表达式格式</div>
+                                <div class="panel-body">
+                                    <p>Cron表达式是一个字符串，字符串以5或6个空格隔开，分为6或7个域，每一个域代表一个含义，其语法格式如下：</p>
+                                    <p><code>[秒] [分] [小时] [日] [月] [周] [年]</code></p>
+                                    <p>其中[年]不是必须的域，可以省略[年]，则一共6个域。</p>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">域说明</div>
+                                <div class="panel-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>域</th>
+                                                <th>是否必填</th>
+                                                <th>允许值</th>
+                                                <th>允许的特殊字符</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>秒</td>
+                                                <td>是</td>
+                                                <td>0-59</td>
+                                                <td>, - * /</td>
+                                            </tr>
+                                            <tr>
+                                                <td>分</td>
+                                                <td>是</td>
+                                                <td>0-59</td>
+                                                <td>, - * /</td>
+                                            </tr>
+                                            <tr>
+                                                <td>小时</td>
+                                                <td>是</td>
+                                                <td>0-23</td>
+                                                <td>, - * /</td>
+                                            </tr>
+                                            <tr>
+                                                <td>日</td>
+                                                <td>是</td>
+                                                <td>1-31</td>
+                                                <td>, - * / ? L W</td>
+                                            </tr>
+                                            <tr>
+                                                <td>月</td>
+                                                <td>是</td>
+                                                <td>1-12 或 JAN-DEC</td>
+                                                <td>, - * /</td>
+                                            </tr>
+                                            <tr>
+                                                <td>周</td>
+                                                <td>是</td>
+                                                <td>1-7 或 SUN-SAT</td>
+                                                <td>, - * / ? L #</td>
+                                            </tr>
+                                            <tr>
+                                                <td>年</td>
+                                                <td>否</td>
+                                                <td>1970-2099</td>
+                                                <td>, - * /</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading">特殊字符说明</div>
+                                <div class="panel-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>字符</th>
+                                                <th>含义</th>
+                                                <th>示例</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>*</td>
+                                                <td>表示匹配该域的任意值</td>
+                                                <td>在分域使用*，表示每分钟都会触发</td>
+                                            </tr>
+                                            <tr>
+                                                <td>?</td>
+                                                <td>只能用在日和周域上，表示不指定值</td>
+                                                <td>当2个子表达式其中之一被指定了值以后，为了避免冲突，需要将另一个子表达式的值设为?</td>
+                                            </tr>
+                                            <tr>
+                                                <td>-</td>
+                                                <td>表示范围</td>
+                                                <td>在小时域使用10-12，表示10点到12点</td>
+                                            </tr>
+                                            <tr>
+                                                <td>,</td>
+                                                <td>表示列出枚举值</td>
+                                                <td>在周域使用MON,WED,FRI，表示周一、周三和周五</td>
+                                            </tr>
+                                            <tr>
+                                                <td>/</td>
+                                                <td>表示起始时间开始触发，然后每隔固定时间触发一次</td>
+                                                <td>在分域使用5/15，表示从第5分钟开始，每15分钟触发一次</td>
+                                            </tr>
+                                            <tr>
+                                                <td>L</td>
+                                                <td>表示最后，只能出现在日和周域</td>
+                                                <td>在日域使用L，表示当月最后一天；在周域使用5L，表示最后一个星期四</td>
+                                            </tr>
+                                            <tr>
+                                                <td>W</td>
+                                                <td>表示有效工作日(周一到周五)，只能出现在日域</td>
+                                                <td>在日域使用15W，表示离每月15号最近的工作日</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#</td>
+                                                <td>用于确定每个月第几个星期几，只能出现在周域</td>
+                                                <td>在周域使用6#3，表示每月的第三个星期五</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 表达式显示区域 -->
+                <div class="expression-area" style="margin-top: 20px;">
+                    <h4>表达式</h4>
+                    <div class="form-group">
+                        <label>表达式字段:</label>
+                        <div class="expression-fields">
+                            <div class="field-group">
+                                <span class="field-label">秒</span>
+                                <input type="text" id="secondField" class="form-control" readonly value="*">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">分钟</span>
+                                <input type="text" id="minuteField" class="form-control" readonly value="*">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">小时</span>
+                                <input type="text" id="hourField" class="form-control" readonly value="*">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">日</span>
+                                <input type="text" id="dayField" class="form-control" readonly value="*">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">月</span>
+                                <input type="text" id="monthField" class="form-control" readonly value="*">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">星期</span>
+                                <input type="text" id="weekField" class="form-control" readonly value="?">
+                            </div>
+                            <div class="field-group">
+                                <span class="field-label">年</span>
+                                <input type="text" id="yearField" class="form-control" readonly value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cron 表达式:</label>
+                        <div class="input-group">
+                            <input type="text" id="cronExpression" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button" onclick="validateCronExpression()">
+                                    <i class="fa fa-check"></i> 验证
+                                </button>
+                            </span>
+                        </div>
+                        <div id="validationResult" class="alert" style="display:none; margin-top:10px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="applyCronExpression()">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.checkbox-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-left: 20px;
+}
+
+.checkbox-inline {
+    margin-right: 5px !important;
+    margin-bottom: 5px !important;
+}
+
+.input-group .form-control {
+    width: auto;
+    flex: 1;
+}
+
+.nav-tabs > li > a {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    margin-right: 5px;
+}
+
+.nav-tabs > li.active > a {
+    background-color: #fff;
+    border-bottom-color: transparent;
+}
+
+.tab-content {
+    border: 1px solid #ddd;
+    border-top: none;
+    padding: 15px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.expression-fields {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    margin-top: 10px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.field-group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 60px;
+}
+
+.field-label {
+    min-width: 30px;
+    text-align: right;
+    margin-right: 5px;
+    color: #555;
+    font-weight: normal;
+    font-size: 12px;
+}
+
+.field-group .form-control {
+    width: 50px;
+    min-width: 50px;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 2px 5px;
+    font-size: 12px;
+}
+
+.field-group .form-control[readonly] {
+    background-color: #fff;
+    cursor: default;
+}
+
+/* 确保模态框内容不溢出 */
+.modal-lg {
+    width: 800px;
+}
+
+.modal-body {
+    padding: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.expression-area {
+    background-color: #f8f8f8;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0;
+}
+
+#cronExpression {
+    font-family: monospace;
+    letter-spacing: 1px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* 修改radio按钮样式 */
+.radio-inline {
+    position: relative;
+    display: inline-block;
+    padding-left: 25px;
+    margin-bottom: 0;
+    font-weight: normal;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.radio-inline input[type="radio"] {
+    position: absolute;
+    left: 0;
+    margin-left: 0;
+    margin-top: 4px;
+    width: 16px;
+    height: 16px;
+    z-index: 1;
+    cursor: pointer;
+    opacity: 1;
+    display: inline-block;
+}
+
+.radio-inline input[type="number"] {
+    display: inline-block;
+    width: 80px;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+/* 修改checkbox样式 */
+.checkbox-inline {
+    position: relative;
+    display: inline-block;
+    padding-left: 25px;
+    margin-bottom: 0;
+    font-weight: normal;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.checkbox-inline input[type="checkbox"] {
+    position: absolute;
+    left: 0;
+    margin-left: 0;
+    margin-top: 4px;
+    width: 16px;
+    height: 16px;
+    z-index: 1;
+    cursor: pointer;
+    opacity: 1;
+    display: inline-block;
+}
+
+/* 确保表单元素正确对齐 */
+.form-group label {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.form-group input[type="number"],
+.form-group input[type="text"],
+.form-group select {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* 修复radio和checkbox的点击区域 */
+.radio-inline,
+.checkbox-inline {
+    z-index: 1;
+    position: relative;
+}
+
+.radio-inline input[type="radio"],
+.checkbox-inline input[type="checkbox"] {
+    z-index: 2;
+}
+
+/* 确保输入框在同一行正确对齐 */
+.form-inline .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+}
+
+/* 修复标签和输入框的间距 */
+.radio-inline + .radio-inline,
+.checkbox-inline + .checkbox-inline {
+    margin-left: 10px;
+}
+
+/* 模态框样式调整 */
+.modal-lg {
+    width: 900px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+/* 表达式字段的新样式 */
+.expression-fields {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.field-group {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.field-label {
+    min-width: 40px;
+    text-align: right;
+    margin-right: 5px;
+    color: #555;
+    font-weight: normal;
+}
+
+.field-group .form-control {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    text-align: center;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+
+.field-group .form-control[readonly] {
+    background-color: #fff;
+    cursor: default;
+}
+
+/* 确保模态框内容不溢出 */
+.modal-lg {
+    width: 900px;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.expression-area {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 0;
+}
+
+#cronExpression {
+    font-family: monospace;
+    letter-spacing: 1px;
+}
+
+.common-expressions {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.common-expressions .list-group-item {
+    cursor: pointer;
+}
+
+.common-expressions .list-group-item:hover {
+    background-color: #f5f5f5;
+}
+
+.help-content {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.help-content .panel {
+    margin-bottom: 15px;
+}
+
+.help-content table {
+    margin-bottom: 0;
+}
+
+.help-content code {
+    background-color: #f8f8f8;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+#validationResult {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+#validationResult.alert-success {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    color: #3c763d;
+}
+
+#validationResult.alert-danger {
+    background-color: #f2dede;
+    border-color: #ebccd1;
+    color: #a94442;
+}
+</style>
+
 <script type="text/template" id="param_templ">
     <div class="form-group">
         <div class="col-xs-2">
@@ -471,6 +1394,356 @@
     <script type="text/javascript">
         var matedataValidator1, matedataValidator2;
         hos.ui.util.breadCrumb("任务列表-编辑");
+
+        // 将showCronModal函数移到全局作用域
+        function showCronModal() {
+            // 获取页面上的Cron表达式值
+            var currentExpression = $('#CronExpression').val();
+            
+            // 如果没有值，则使用默认值
+            if (!currentExpression) {
+                currentExpression = '* * * * * ?';
+            }
+
+            // 分割表达式为各个部分
+            var parts = currentExpression.split(' ');
+
+            // 设置各个字段的值
+            $('#secondField').val(parts[0] || '*');
+            $('#minuteField').val(parts[1] || '*');
+            $('#hourField').val(parts[2] || '*');
+            $('#dayField').val(parts[3] || '*');
+            $('#monthField').val(parts[4] || '*');
+            $('#weekField').val(parts[5] || '?');
+            if (parts.length > 6) {
+                $('#yearField').val(parts[6]);
+            } else {
+                $('#yearField').val('');
+            }
+
+            // 根据各个字段的值设置相应的选项
+            setTimeUnitValue('second', parts[0] || '*');
+            setTimeUnitValue('minute', parts[1] || '*');
+            setTimeUnitValue('hour', parts[2] || '*');
+            setTimeUnitValue('day', parts[3] || '*');
+            setTimeUnitValue('month', parts[4] || '*');
+            setTimeUnitValue('week', parts[5] || '?');
+            if (parts.length > 6) {
+                setTimeUnitValue('year', parts[6]);
+            }
+
+            // 更新Cron表达式显示
+            updateCronExpression();
+
+            // 显示模态框
+            $('#cronModal').modal('show');
+        }
+
+        function setTimeUnitValue(unit, value) {
+            // 重置所有选项
+            if (unit === 'year') {
+                $(`input[name="${unit}Type"][value="?"]`).prop('checked', true);
+            } else {
+                $(`input[name="${unit}Type"][value="*"]`).prop('checked', true);
+            }
+            $(`.${unit}-checkbox`).prop('checked', false);
+            $(`#${unit}Start, #${unit}End, #${unit}Begin, #${unit}Interval, #${unit}Work`).val('');
+
+            if (!value || value === '') {
+                if (unit === 'year') {
+                    $(`input[name="${unit}Type"][value="?"]`).prop('checked', true);
+                }
+                return;
+            }
+
+            if (value === '*') {
+                $(`input[name="${unit}Type"][value="*"]`).prop('checked', true);
+                return;
+            }
+
+            if (value === '?') {
+                $(`input[name="${unit}Type"][value="?"]`).prop('checked', true);
+                return;
+            }
+
+            if (value.includes('/')) {
+                // 处理循环格式 x/y
+                var parts = value.split('/');
+                $(`input[name="${unit}Type"][value="loop"]`).prop('checked', true);
+                $(`#${unit}Begin`).val(parts[0]);
+                $(`#${unit}Interval`).val(parts[1]);
+            }
+            else if (value.includes('-')) {
+                // 处理周期格式 x-y
+                var parts = value.split('-');
+                $(`input[name="${unit}Type"][value="period"]`).prop('checked', true);
+                $(`#${unit}Start`).val(parts[0]);
+                $(`#${unit}End`).val(parts[1]);
+            }
+            else if (value === 'L' && unit === 'day') {
+                // 处理月末
+                $(`input[name="${unit}Type"][value="last"]`).prop('checked', true);
+            }
+            else if (value.endsWith('W') && unit === 'day') {
+                // 处理最近工作日
+                $(`input[name="${unit}Type"][value="work"]`).prop('checked', true);
+                $(`#${unit}Work`).val(value.replace('W', ''));
+            }
+            else if (value.endsWith('L') && unit === 'week') {
+                // 处理本月最后一个星期几
+                $(`input[name="${unit}Type"][value="last"]`).prop('checked', true);
+                $('#weekLast').val(value.replace('L', ''));
+            }
+            else if (value.includes(',') || /^\d+$/.test(value)) {
+                // 处理指定值
+                $(`input[name="${unit}Type"][value="specific"]`).prop('checked', true);
+                var values = value.split(',');
+                values.forEach(v => {
+                    $(`.${unit}-checkbox[value="${v}"]`).prop('checked', true);
+                });
+
+                // 特殊处理年份
+                if (unit === 'year') {
+                    values.forEach(year => {
+                        if ($('#yearList').find(`[data-year="${year}"]`).length === 0) {
+                            var yearTag = $('<span class="label label-info margin-right-5" style="display: inline-block; margin: 5px;" data-year="' + year + '">' + 
+                                year + ' <i class="fa fa-times" onclick="$(this).parent().remove(); updateField(\'year\');"></i></span>');
+                            $('#yearList').append(yearTag);
+                        }
+                    });
+                }
+            }
+        }
+
+        function updateField(unit) {
+            var type = $(`input[name="${unit}Type"]:checked`).val();
+            var value = '*';
+
+            switch(type) {
+                case '*':
+                    value = '*';
+                    break;
+                case '?':
+                    if (unit === 'year') {
+                        value = '';
+                    } else {
+                        value = '?';
+                    }
+                    break;
+                case 'period':
+                    var start = $(`#${unit}Start`).val();
+                    var end = $(`#${unit}End`).val();
+                    if (start && end) {
+                        value = start + '-' + end;
+                    }
+                    break;
+                case 'loop':
+                    var begin = $(`#${unit}Begin`).val();
+                    var interval = $(`#${unit}Interval`).val();
+                    value = begin + '/' + interval;
+                    break;
+                case 'specific':
+                    var selected = [];
+                    $(`.${unit}-checkbox:checked`).each(function() {
+                        selected.push($(this).val());
+                    });
+                    value = selected.length > 0 ? selected.join(',') : '*';
+                    break;
+                case 'work':
+                    if (unit === 'day') {
+                        value = $(`#${unit}Work`).val() + 'W';
+                    }
+                    break;
+                case 'last':
+                    if (unit === 'day') {
+                        value = 'L';
+                    } else if (unit === 'week') {
+                        value = $('#weekLast').val() + 'L';
+                    }
+                    break;
+            }
+
+            $(`#${unit}Field`).val(value);
+            updateCronExpression();
+        }
+
+        function updateCronExpression() {
+            var second = $('#secondField').val();
+            var minute = $('#minuteField').val();
+            var hour = $('#hourField').val();
+            var day = $('#dayField').val();
+            var month = $('#monthField').val();
+            var week = $('#weekField').val();
+            var year = $('#yearField').val();
+
+            var expression = [second, minute, hour, day, month, week];
+            if (year) {
+                expression.push(year);
+            }
+
+            $('#cronExpression').val(expression.join(' '));
+        }
+
+        function applyCommonExpression(expression, description) {
+            $('#cronExpression').val(expression);
+            validateCronExpression();
+        }
+
+        function validateCronExpression() {
+            var expression = $('#cronExpression').val();
+            var resultDiv = $('#validationResult');
+            
+            // 基本的格式验证
+            var parts = expression.split(' ');
+            if (parts.length < 6 || parts.length > 7) {
+                resultDiv.removeClass('alert-success').addClass('alert-danger')
+                    .html('表达式格式错误：必须包含6或7个字段（秒 分 时 日 月 周 [年]）')
+                    .show();
+                return false;
+            }
+
+            // 验证每个字段
+            var isValid = true;
+            var errorMessage = '';
+
+            // 验证秒
+            if (!validateField(parts[0], 0, 59)) {
+                isValid = false;
+                errorMessage += '秒字段格式错误<br>';
+            }
+
+            // 验证分钟
+            if (!validateField(parts[1], 0, 59)) {
+                isValid = false;
+                errorMessage += '分钟字段格式错误<br>';
+            }
+
+            // 验证小时
+            if (!validateField(parts[2], 0, 23)) {
+                isValid = false;
+                errorMessage += '小时字段格式错误<br>';
+            }
+
+            // 验证日期
+            if (!validateField(parts[3], 1, 31, true)) {
+                isValid = false;
+                errorMessage += '日期字段格式错误<br>';
+            }
+
+            // 验证月份
+            if (!validateField(parts[4], 1, 12)) {
+                isValid = false;
+                errorMessage += '月份字段格式错误<br>';
+            }
+
+            // 验证星期
+            if (!validateField(parts[5], 1, 7, true)) {
+                isValid = false;
+                errorMessage += '星期字段格式错误<br>';
+            }
+
+            // 验证年份（如果存在）
+            if (parts.length > 6 && parts[6] !== '') {
+                if (!validateField(parts[6], 1970, 2099)) {
+                    isValid = false;
+                    errorMessage += '年份字段格式错误<br>';
+                }
+            }
+
+            if (isValid) {
+                resultDiv.removeClass('alert-danger').addClass('alert-success')
+                    .html('表达式格式正确')
+                    .show();
+                return true;
+            } else {
+                resultDiv.removeClass('alert-success').addClass('alert-danger')
+                    .html(errorMessage)
+                    .show();
+                return false;
+            }
+        }
+
+        function validateField(field, min, max, allowSpecial) {
+            if (field === '*' || field === '?') {
+                return true;
+            }
+
+            // 处理范围
+            if (field.includes('-')) {
+                var range = field.split('-');
+                if (range.length !== 2) return false;
+                return validateNumber(range[0], min, max) && validateNumber(range[1], min, max);
+            }
+
+            // 处理列表
+            if (field.includes(',')) {
+                var values = field.split(',');
+                return values.every(function(value) {
+                    return validateNumber(value, min, max);
+                });
+            }
+
+            // 处理步长
+            if (field.includes('/')) {
+                var parts = field.split('/');
+                if (parts.length !== 2) return false;
+                if (parts[0] === '*') {
+                    return validateNumber(parts[1], 1, max);
+                }
+                return validateNumber(parts[0], min, max) && validateNumber(parts[1], 1, max);
+            }
+
+            // 处理特殊字符
+            if (allowSpecial) {
+                if (field === 'L' || field.endsWith('W') || field.includes('#')) {
+                    return true;
+                }
+            }
+
+            // 处理英文星期表示
+            if (min === 1 && max === 7) { // 星期字段
+                var weekMap = {
+                    'SUN': '1', 'MON': '2', 'TUE': '3', 'WED': '4', 
+                    'THU': '5', 'FRI': '6', 'SAT': '7'
+                };
+                var upperField = field.toUpperCase();
+                if (weekMap[upperField]) {
+                    return true;
+                }
+                // 处理范围中的英文星期
+                if (field.includes('-')) {
+                    var range = field.split('-');
+                    if (range.length === 2 && weekMap[range[0].toUpperCase()] && weekMap[range[1].toUpperCase()]) {
+                        return true;
+                    }
+                }
+                // 处理列表中的英文星期
+                if (field.includes(',')) {
+                    var values = field.split(',');
+                    return values.every(function(value) {
+                        return weekMap[value.trim().toUpperCase()] !== undefined;
+                    });
+                }
+            }
+
+            // 处理单个数字
+            return validateNumber(field, min, max);
+        }
+
+        function validateNumber(value, min, max) {
+            var num = parseInt(value);
+            return !isNaN(num) && num >= min && num <= max;
+        }
+
+        // 修改applyCronExpression函数，添加验证
+        function applyCronExpression() {
+            if (validateCronExpression()) {
+                var expression = $('#cronExpression').val();
+                $('#CronExpression').val(expression);
+                $('#cronModal').modal('hide');
+            }
+        }
+
         $(document).ready(function () {
             hos.ui.util.formValidate("form1");
             hos.ui.util.formValidate("form4");
@@ -596,31 +1869,106 @@
                 data.Nexts = $('#nexts-list').nestable('serialize').map(obj => { return obj.id; });
                 hos.ui.util.postJson("@(Model==null?"/Schedule/Create":"/Schedule/Edit")", data);
             });
-        });
-        function getTemplateData(target) {
-            var params = [];
-            $("#" + target + " .form-group").each(function (index, item) {
-                var ctrl = $(item);
-                var key = ctrl.find("input[name='ParamKey']").val();
-                var value = ctrl.find("input[name='ParamValue']").val();
-                if (key && value) {
-                    params.push({
-                        ParamKey: key,
-                        ParamValue: value,
-                        ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
+
+            function getTemplateData(target) {
+                var params = [];
+                $("#" + target + " .form-group").each(function (index, item) {
+                    var ctrl = $(item);
+                    var key = ctrl.find("input[name='ParamKey']").val();
+                    var value = ctrl.find("input[name='ParamValue']").val();
+                    if (key && value) {
+                        params.push({
+                            ParamKey: key,
+                            ParamValue: value,
+                            ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
+                        });
+                    }
+                });
+                return params;
+            }
+            function executorCheckAll(obj) {
+                if (obj.checked == true) {
+                    var val = $("#Executor").children().map((i, obj) => { return obj.value; });
+                    $('#Executor').val(val).trigger('change');
+                }
+                else {
+                    $('#Executor').val(null).trigger("change");
+                }
+            }
+            function initCronGenerator() {
+                // 秒设置的事件处理
+                initTimeUnitEvents('second');
+                // 分钟设置的事件处理
+                initTimeUnitEvents('minute');
+                // 小时设置的事件处理
+                initTimeUnitEvents('hour');
+                // 日期设置的事件处理
+                initTimeUnitEvents('day');
+                // 月份设置的事件处理
+                initTimeUnitEvents('month');
+                // 周设置的事件处理
+                initTimeUnitEvents('week');
+                // 年份设置的事件处理
+                initTimeUnitEvents('year');
+            }
+            function initTimeUnitEvents(unit) {
+                $(`input[name="${unit}Type"]`).change(function() {
+                    updateField(unit);
+                });
+
+                $(`.${unit}-checkbox`).change(function() {
+                    if ($(`input[name="${unit}Type"][value="specific"]`).prop('checked')) {
+                        updateField(unit);
+                    }
+                });
+
+                $(`#${unit}Start, #${unit}End`).change(function() {
+                    if ($(`input[name="${unit}Type"][value="period"]`).prop('checked')) {
+                        updateField(unit);
+                    }
+                });
+
+                $(`#${unit}Begin, #${unit}Interval`).change(function() {
+                    if ($(`input[name="${unit}Type"][value="loop"]`).prop('checked')) {
+                        updateField(unit);
+                    }
+                });
+
+                // 特殊处理
+                if (unit === 'week') {
+                    $('#weekLast').change(function() {
+                        if ($('input[name="weekType"][value="last"]').prop('checked')) {
+                            updateField('week');
+                        }
                     });
                 }
-            });
-            return params;
-        }
-        function executorCheckAll(obj) {
-            if (obj.checked == true) {
-                var val = $("#Executor").children().map((i, obj) => { return obj.value; });
-                $('#Executor').val(val).trigger('change');
+                if (unit === 'day') {
+                    $('#dayWork').change(function() {
+                        if ($('input[name="dayType"][value="work"]').prop('checked')) {
+                            updateField('day');
+                        }
+                    });
+                }
             }
-            else {
-                $('#Executor').val(null).trigger("change");
+            function addYearValue() {
+                var year = $('#yearValue').val();
+                if (year && /^\d{4}$/.test(year)) {
+                    if ($('#yearList').find(`[data-year="${year}"]`).length === 0) {
+                        var yearTag = $('<span class="label label-info margin-right-5" style="display: inline-block; margin: 5px;" data-year="' + year + '">' + 
+                            year + ' <i class="fa fa-times" onclick="$(this).parent().remove(); updateField(\'year\');"></i></span>');
+                        $('#yearList').append(yearTag);
+                        $('#yearValue').val('');
+                        updateField('year');
+                    } else {
+                        hos.ui.util.infoTip('该年份已存在');
+                    }
+                } else {
+                    hos.ui.util.infoTip('请输入有效的4位年份');
+                }
             }
-        }
+
+            // 初始化Cron表达式生成器
+            initCronGenerator();
+        });
     </script>
 }

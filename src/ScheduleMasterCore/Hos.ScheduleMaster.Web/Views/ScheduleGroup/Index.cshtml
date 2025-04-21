@@ -1,0 +1,748 @@
+@{
+    ViewData["Title"] = "任务分组管理";
+}
+
+@section styles {
+    <link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="~/assets/css/toastr.css" rel="stylesheet" />
+    <style>
+        .form-control-error {
+            display: block;
+            color: #e46f61;
+            margin-top: 5px;
+        }
+        .form-control-error:before {
+            content: '\f056';
+            font-family: 'FontAwesome';
+        }
+        .bootstrap-table .bs-bars {
+            width: 100%;
+        }
+        .box {
+            border-top: 3px solid #3c8dbc;
+            margin-bottom: 20px;
+            background: #fff;
+            border-radius: 3px;
+            width: 100%;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+        .box-header {
+            color: #444;
+            display: block;
+            padding: 10px;
+            position: relative;
+        }
+        .box-header.with-border {
+            border-bottom: 1px solid #f4f4f4;
+        }
+        .box-header .box-title {
+            display: inline-block;
+            font-size: 18px;
+            margin: 0;
+            line-height: 1;
+        }
+        .box-body {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 3px;
+            border-bottom-left-radius: 3px;
+            padding: 10px;
+        }
+        .btn-xs {
+            padding: 1px 5px;
+            font-size: 12px;
+            line-height: 1.5;
+            border-radius: 3px;
+        }
+        .modal-header {
+            background-color: #3c8dbc;
+            color: #fff;
+        }
+        .modal-header .close {
+            color: #fff;
+            opacity: 1;
+        }
+        .modal-title {
+            font-size: 16px;
+        }
+        .table > thead > tr > th {
+            background-color: #f9f9f9;
+            border-bottom: 2px solid #f4f4f4;
+        }
+        .table > tbody > tr > td {
+            vertical-align: middle;
+        }
+        .btn-primary {
+            background-color: #3c8dbc;
+            border-color: #367fa9;
+        }
+        .btn-primary:hover {
+            background-color: #367fa9;
+            border-color: #204d74;
+        }
+        .btn-danger {
+            background-color: #dd4b39;
+            border-color: #d73925;
+        }
+        .btn-danger:hover {
+            background-color: #d73925;
+            border-color: #ac2925;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            border-color: #e08e0b;
+        }
+        .btn-warning:hover {
+            background-color: #e08e0b;
+            border-color: #c87f0a;
+        }
+        .btn-info {
+            background-color: #00c0ef;
+            border-color: #00acd6;
+        }
+        .btn-info:hover {
+            background-color: #00acd6;
+            border-color: #0097bc;
+        }
+        .detail-view {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #f4f4f4;
+        }
+        .detail-view .bootstrap-table {
+            margin-bottom: 0;
+        }
+        .detail-view .table {
+            margin-bottom: 0;
+            background-color: #fff;
+        }
+        .detail-view .table > thead > tr > th {
+            background-color: #f5f5f5;
+            padding: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+        }
+        .detail-view .table > tbody > tr > td {
+            border-top: 1px solid #f4f4f4;
+            padding: 8px;
+            font-size: 13px;
+            color: #555;
+        }
+        .detail-view .table > tbody > tr:first-child > td {
+            border-top: none;
+        }
+        .detail-view .table > tbody > tr:hover > td {
+            background-color: #f5f5f5;
+        }
+        .detail-view .table > thead > tr > th:first-child {
+            width: 50%;
+            min-width: 200px;
+        }
+        .detail-view .table > thead > tr > th:nth-child(2) {
+            width: 20%;
+            min-width: 100px;
+        }
+        .detail-view .table > thead > tr > th:nth-child(3) {
+            width: 15%;
+            min-width: 80px;
+        }
+        .detail-view .table > thead > tr > th:last-child {
+            width: 15%;
+            min-width: 120px;
+        }
+        .bootstrap-table .detail-icon {
+            color: #3c8dbc;
+        }
+        .bootstrap-table .detail-icon:hover {
+            color: #367fa9;
+        }
+        .detail-view .btn-xs {
+            padding: 2px 6px;
+            font-size: 12px;
+            line-height: 1.5;
+            border-radius: 3px;
+        }
+        .detail-view .btn-danger {
+            background-color: #dd4b39;
+            border-color: #d73925;
+        }
+        .detail-view .btn-danger:hover {
+            background-color: #d73925;
+            border-color: #ac2925;
+        }
+    </style>
+}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <div class="box-tools">
+                    <button type="button" class="btn btn-primary" onclick="showCreateModal()">
+                        <i class="fa fa-plus"></i> 新建分组
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <table id="groupTable"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 创建/编辑分组模态框 -->
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title" id="groupModalTitle">新建分组</h4>
+            </div>
+            <div class="modal-body">
+                <form id="groupForm">
+                    <input type="hidden" id="groupId" />
+                    <div class="form-group">
+                        <label for="groupName">分组名称</label>
+                        <input type="text" class="form-control" id="groupName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="groupDescription">分组描述</label>
+                        <textarea class="form-control" id="groupDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveGroup()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 分组任务列表模态框 -->
+<div class="modal fade" id="scheduleListModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">分组任务列表</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button type="button" class="btn btn-primary" onclick="showAddScheduleModal()">
+                            <i class="fa fa-plus"></i> 添加任务
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table id="scheduleTable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加任务模态框 -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">添加任务</h4>
+            </div>
+            <div class="modal-body">
+                <table id="availableScheduleTable"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/assets/js/toastr/toastr.js"></script>
+    <script src="~/assets/js/moment/moment.min.js"></script>
+    <script>
+        hos.ui.util.breadCrumb("任务分组");
+        var currentGroupId = null;
+
+        $(function () {
+            initGroupTable();
+            initScheduleTable();
+            initAvailableScheduleTable();
+        });
+
+        function initGroupTable() {
+            $('#groupTable').bootstrapTable({
+                url: '/ScheduleGroup/GetAllGroups',
+                method: 'get',
+                toolbar: '#toolbar',
+                striped: true,
+                cache: false,
+                pagination: true,
+                sortable: false,
+                queryParams: function (params) {
+                    return params;
+                },
+                sidePagination: "server",
+                pageNumber: 1,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                search: true,
+                strictSearch: true,
+                showColumns: true,
+                showRefresh: true,
+                minimumCountColumns: 2,
+                clickToSelect: true,
+                uniqueId: "id",
+                showToggle: true,
+                showPaginationSwitch: true,
+                cardView: false,
+                detailView: true,
+                detailViewIcon: true,
+                detailViewByClick: true,
+                onLoadSuccess: function() {
+                    // 数据加载完成后展开所有行
+                    $('#groupTable').bootstrapTable('expandAllRows');
+                },
+                detailFormatter: function(index, row) {
+                    return '<div class="schedule-detail-' + row.id + ' detail-view"></div>';
+                },
+                onExpandRow: function(index, row, $detail) {
+                    var scheduleTable = $detail.find('.schedule-detail-' + row.id);
+                    if (scheduleTable.length === 0) {
+                        scheduleTable = $('<div class="schedule-detail-' + row.id + ' detail-view"></div>');
+                        $detail.append(scheduleTable);
+                    }
+                    
+                    scheduleTable.bootstrapTable({
+                        url: '/ScheduleGroup/GetGroupSchedules',
+                        method: 'get',
+                        queryParams: function(params) {
+                            params.groupId = row.id;
+                            return params;
+                        },
+                        responseHandler: function(res) {
+                            // 为每条数据添加groupId
+                            res.rows.forEach(function(item) {
+                                item.groupId = row.id;
+                            });
+                            return res;
+                        },
+                        classes: 'table table-bordered table-hover',
+                        columns: [{
+                            field: 'title',
+                            title: '任务名称',
+                            width: '50%'
+                        }, {
+                            field: 'metaType',
+                            title: '任务类型',
+                            width: '20%',
+                            formatter: function (value) {
+                                var types = {
+                                    1: '程序集',
+                                    2: 'HTTP',
+                                };
+                                return types[value] || value;
+                            }
+                        }, {
+                            field: 'status',
+                            title: '状态',
+                            width: '15%',
+                            formatter: function (value) {
+                                var status = {
+                                    0: '<span class="label label-danger">停止</span>',
+                                    1: '<span class="label label-success">运行中</span>',
+                                    2: '<span class="label label-warning">已暂停</span>'
+                                };
+                                return status[value] || value;
+                            }
+                        }, {
+                            field: 'operate',
+                            title: '操作',
+                            width: '15%',
+                            align: 'center',
+                            formatter: function (value, row, index) {
+                                return [
+                                    '<a class="view btn btn-xs btn-info" href="/Schedule/Index?scheduleId=' + row.id + '" title="查看任务列表">',
+                                    '<i class="fa fa-list"></i> 任务列表',
+                                    '</a> ',
+                                    '<a class="remove btn btn-xs btn-danger" href="javascript:void(0)" title="移除">',
+                                    '<i class="fa fa-times"></i> 移除',
+                                    '</a>'
+                                ].join('');
+                            },
+                            events: {
+                                'click .remove': function (e, value, row, index) {
+                                    removeScheduleFromGroup(row.id, row.groupId);
+                                }
+                            }
+                        }]
+                    });
+                },
+                columns: [{
+                    field: 'name',
+                    title: '分组名称'
+                }, {
+                    field: 'description',
+                    title: '描述'
+                }, {
+                    field: 'createUserName',
+                    title: '创建人'
+                }, {
+                    field: 'createTime',
+                    title: '创建时间',
+                    formatter: function (value) {
+                        return moment(value).format('YYYY-MM-DD HH:mm:ss');
+                    }
+                }, {
+                    field: 'operate',
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return [
+                            '<a class="edit btn btn-xs btn-info" href="javascript:void(0)" title="编辑">',
+                            '<i class="fa fa-edit"></i> 编辑',
+                            '</a> ',
+                            '<a class="remove btn btn-xs btn-danger" href="javascript:void(0)" title="删除">',
+                            '<i class="fa fa-trash-o"></i> 删除',
+                            '</a> ',
+                            '<a class="add btn btn-xs btn-success" href="javascript:void(0)" title="添加任务">',
+                            '<i class="fa fa-plus"></i> 添加任务',
+                            '</a>'
+                        ].join('');
+                    },
+                    events: {
+                        'click .edit': function (e, value, row, index) {
+                            showEditModal(row);
+                        },
+                        'click .remove': function (e, value, row, index) {
+                            deleteGroup(row.id);
+                        },
+                        'click .add': function (e, value, row, index) {
+                            showAddScheduleModal(row.id);
+                        }
+                    }
+                }]
+            });
+        }
+
+        function initScheduleTable() {
+            $('#scheduleTable').bootstrapTable({
+                url: '/ScheduleGroup/GetGroupSchedules',
+                method: 'get',
+                toolbar: '#toolbar',
+                striped: true,
+                cache: false,
+                pagination: true,
+                sortable: false,
+                queryParams: function (params) {
+                    params.groupId = currentGroupId;
+                    return params;
+                },
+                sidePagination: "server",
+                pageNumber: 1,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                search: true,
+                strictSearch: true,
+                showColumns: true,
+                showRefresh: true,
+                minimumCountColumns: 2,
+                clickToSelect: true,
+                uniqueId: "id",
+                showToggle: true,
+                showPaginationSwitch: true,
+                cardView: false,
+                detailView: false,
+                columns: [{
+                    field: 'title',
+                    title: '任务名称'
+                }, {
+                    field: 'metaType',
+                    title: '任务类型',
+                    formatter: function (value) {
+                        var types = {
+                            1: '程序集',
+                            2: 'HTTP',
+                        };
+                        return types[value] || value;
+                    }
+                }, {
+                    field: 'status',
+                    title: '状态',
+                    formatter: function (value) {
+                        var status = {
+                            0: '停止',
+                            1: '运行中',
+                            2: '已暂停'
+                        };
+                        return status[value] || value;
+                    }
+                }, {
+                    field: 'operate',
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return [
+                            '<a class="remove btn btn-xs btn-danger" href="javascript:void(0)" title="移除">',
+                            '<i class="fa fa-times"></i> 移除',
+                            '</a>'
+                        ].join('');
+                    },
+                    events: {
+                        'click .remove': function (e, value, row, index) {
+                            removeScheduleFromGroup(row.id, row.groupId);
+                        }
+                    }
+                }]
+            });
+        }
+
+        function initAvailableScheduleTable() {
+            $('#availableScheduleTable').bootstrapTable({
+                url: '/Schedule/GetList',
+                method: 'get',
+                toolbar: '#toolbar',
+                striped: true,
+                cache: false,
+                pagination: true,
+                sortable: false,
+                queryParams: function (params) {
+                    return params;
+                },
+                sidePagination: "server",
+                pageNumber: 1,
+                pageSize: 10,
+                pageList: [10, 25, 50, 100],
+                search: true,
+                strictSearch: true,
+                showColumns: true,
+                showRefresh: true,
+                minimumCountColumns: 2,
+                clickToSelect: true,
+                uniqueId: "id",
+                showToggle: true,
+                showPaginationSwitch: true,
+                cardView: false,
+                detailView: false,
+                columns: [{
+                    field: 'title',
+                    title: '任务名称'
+                }, {
+                    field: 'metaType',
+                    title: '任务类型',
+                    formatter: function (value) {
+                        var types = {
+                            1: '程序集',
+                            2: 'HTTP',
+                        };
+                        return types[value] || value;
+                    }
+                }, {
+                    field: 'status',
+                    title: '状态',
+                    formatter: function (value) {
+                        var status = {
+                            0: '停止',
+                            1: '运行中',
+                            2: '已暂停'
+                        };
+                        return status[value] || value;
+                    }
+                }, {
+                    field: 'operate',
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        return [
+                            '<a class="add btn btn-xs btn-primary" href="javascript:void(0)" title="添加">',
+                            '<i class="fa fa-plus"></i> 添加',
+                            '</a>'
+                        ].join('');
+                    },
+                    events: {
+                        'click .add': function (e, value, row, index) {
+                            addScheduleToGroup(row.id);
+                        }
+                    }
+                }]
+            });
+        }
+
+        function showCreateModal() {
+            $('#groupModalTitle').text('新建分组');
+            $('#groupId').val('');
+            $('#groupName').val('');
+            $('#groupDescription').val('');
+            $('#groupModal').modal('show');
+        }
+
+        function showEditModal(group) {
+            $('#groupModalTitle').text('编辑分组');
+            $('#groupId').val(group.id);
+            $('#groupName').val(group.name);
+            $('#groupDescription').val(group.description);
+            $('#groupModal').modal('show');
+        }
+
+        function saveGroup() {
+            var id = $('#groupId').val();
+            var name = $('#groupName').val();
+            var description = $('#groupDescription').val();
+
+            if (!name) {
+                toastr.error('请输入分组名称');
+                return;
+            }
+
+            var data = {
+                name: name,
+                description: description
+            };
+
+            if (id) {
+                data.id = id;
+                $.ajax({
+                    url: '/ScheduleGroup/Update',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        if (result.Status === 1) {
+                            toastr.success(result.Message || '更新成功');
+                            $('#groupModal').modal('hide');
+                            $('#groupTable').bootstrapTable('refresh');
+                        } else {
+                            toastr.error(result.Message || '更新失败');
+                        }
+                    }
+                });
+            } else {
+                $.ajax({
+                    url: '/ScheduleGroup/Create',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (result) {
+                        if (result.Status === 1) {
+                            toastr.success(result.Message || '创建成功');
+                            $('#groupModal').modal('hide');
+                            $('#groupTable').bootstrapTable('refresh');
+                        } else {
+                            toastr.error(result.Message || '创建失败');
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteGroup(id) {
+            if (confirm('确定要删除该分组吗？')) {
+                $.post('/ScheduleGroup/Delete', { id: id }, function (result) {
+                    if (result.Status === 1) {
+                        toastr.success(result.Message || '删除成功');
+                        $('#groupTable').bootstrapTable('refresh');
+                    } else {
+                        toastr.error(result.Message || '删除失败');
+                    }
+                });
+            }
+        }
+
+        function showScheduleList(groupId) {
+            currentGroupId = groupId;
+            $('#scheduleTable').bootstrapTable('refresh', {
+                query: {
+                    groupId: groupId
+                }
+            });
+            $('#scheduleListModal').modal('show');
+        }
+
+        function showAddScheduleModal(groupId) {
+            currentGroupId = groupId;
+            // 先获取当前分组的所有任务
+            $.get('/ScheduleGroup/GetGroupSchedules', { groupId: groupId }, function(groupSchedules) {
+                // 获取所有可用任务
+                $.get('/Schedule/GetList', function(allSchedules) {
+                    // 过滤掉已经在分组中的任务
+                    var availableSchedules = allSchedules.rows.filter(function(schedule) {
+                        return !groupSchedules.rows.some(function(groupSchedule) {
+                            return groupSchedule.id === schedule.id;
+                        });
+                    });
+                    
+                    // 更新表格数据
+                    $('#availableScheduleTable').bootstrapTable('load', {
+                        total: availableSchedules.length,
+                        rows: availableSchedules
+                    });
+                    
+                    $('#addScheduleModal').modal('show');
+                });
+            });
+        }
+
+        function addScheduleToGroup(scheduleId) {
+            $.post('/ScheduleGroup/AddScheduleToGroup', {
+                groupId: currentGroupId,
+                scheduleId: scheduleId
+            }, function (result) {
+                if (result.Status === 1) {
+                    toastr.success(result.Message || '添加成功');
+                    $('#addScheduleModal').modal('hide');
+                    // 刷新主表格，并展开当前分组
+                    $('#groupTable').bootstrapTable('refresh', {
+                        query: {},
+                        onLoadSuccess: function() {
+                            // 找到当前分组的行索引
+                            var rowIndex = $('#groupTable').bootstrapTable('getData').findIndex(function(row) {
+                                return row.id === currentGroupId;
+                            });
+                            if (rowIndex !== -1) {
+                                // 展开当前分组
+                                $('#groupTable').bootstrapTable('expandRow', rowIndex);
+                            }
+                        }
+                    });
+                } else {
+                    toastr.error(result.Message || '添加失败');
+                }
+            });
+        }
+
+        function removeScheduleFromGroup(scheduleId, groupId) {
+            if (confirm('确定要从分组中移除该任务吗？')) {
+                $.post('/ScheduleGroup/RemoveScheduleFromGroup', {
+                    groupId: groupId,
+                    scheduleId: scheduleId
+                }, function (result) {
+                    if (result.Status === 1) {
+                        toastr.success(result.Message || '移除成功');
+                        // 重新加载整个分组表格
+                        $('#groupTable').bootstrapTable('refresh', {
+                            query: {},
+                            onLoadSuccess: function() {
+                                // 找到当前分组的行索引
+                                var rowIndex = $('#groupTable').bootstrapTable('getData').findIndex(function(row) {
+                                    return row.id === groupId;
+                                });
+                                if (rowIndex !== -1) {
+                                    // 展开当前分组
+                                    $('#groupTable').bootstrapTable('expandRow', rowIndex);
+                                }
+                            }
+                        });
+                    } else {
+                        toastr.error(result.Message || '移除失败');
+                    }
+                });
+            }
+        }
+    </script>
+} 

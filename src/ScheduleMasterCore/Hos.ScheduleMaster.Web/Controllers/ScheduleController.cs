@@ -26,12 +26,41 @@ namespace Hos.ScheduleMaster.Web.Controllers
         public INodeService _nodeService { get; set; }
 
         /// <summary>
+        /// 获取任务列表
+        /// </summary>
+        /// <param name="pageNumber">页码</param>
+        /// <param name="pageSize">每页大小</param>
+        /// <param name="searchText">搜索文本</param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult GetList(int pageNumber = 1, int pageSize = 10, string searchText = "")
+        {
+            var pager = new ListPager<ScheduleInfo>(pageNumber, pageSize);
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                pager.AddFilter(m => m.Title.Contains(searchText));
+            }
+            pager = _scheduleService.QueryPager(pager,null,"");
+            return Json(new
+            {
+                total = pager.Total,
+                rows = pager.Rows.Select(m => new
+                {
+                    id = m.Id,
+                    title = m.Title,
+                    metaType = m.MetaType,
+                    status = m.Status
+                })
+            });
+        }
+
+        /// <summary>
         /// 任务列表页面
         /// </summary>
         /// <returns></returns>
-        public ActionResult Index()
+        public ActionResult Index( string scheduleId)
         {
-            ViewBag.PagerQueryUrl = Url.Action("QueryPager", "Schedule");
+            ViewBag.PagerQueryUrl = Url.Action("QueryPager", "Schedule",new { scheduleId = scheduleId });
             return View();
         }
 
@@ -43,9 +72,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="workerName"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryPager(int? status, string title = "", string workerName = "")
+        public ActionResult QueryPager(int? status, string title = "", string workerName = "",string scheduleId="")
         {
-            return QueryList(null, status, title, workerName);
+            return QueryList(null, status, title, workerName,scheduleId);
         }
 
         /// <summary>
@@ -58,7 +87,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpGet]
         public ActionResult QueryCurrentUserPager(int? status, string title, string workerName)
         {
-            return QueryList(CurrentAdmin.Id, status, title, workerName);
+            return QueryList(CurrentAdmin.Id, status, title, workerName,"");
         }
 
         /// <summary>
@@ -69,7 +98,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="title"></param>
         /// <param name="workerName"></param>
         /// <returns></returns>
-        private ActionResult QueryList(int? userId, int? status, string title, string workerName)
+        private ActionResult QueryList(int? userId, int? status, string title, string workerName, string scheduleId = "")
         {
             var pager = new ListPager<ScheduleInfo>(PageIndex, PageSize);
             if (status.HasValue && status.Value >= 0)
@@ -79,6 +108,10 @@ namespace Hos.ScheduleMaster.Web.Controllers
             if (!string.IsNullOrEmpty(title))
             {
                 pager.AddFilter(m => m.Title.Contains(title));
+            }
+            if (!string.IsNullOrEmpty(scheduleId))
+            {
+                pager.AddFilter(s => s.Id == Guid.Parse(scheduleId));
             }
             pager = _scheduleService.QueryPager(pager, userId, workerName);
             return GridData(pager.Total, pager.Rows);
